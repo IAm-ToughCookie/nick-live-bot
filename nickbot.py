@@ -2,6 +2,7 @@ import requests
 import time
 import tweepy
 import config
+import random
 
 # DEBUG ONLY
 set_online = False  # if set to true will set URL to BobRoss instead of Nick's stream! 
@@ -44,7 +45,13 @@ def check_online(url, client_id, accept):
         stream_url = resp.get('stream').get('channel').get('url')
         tweet_send = False
         if tweet_send == False:
-            tweet(f'.@LiL_Nickyy_ is now online playing {game}, join at {stream_url}')
+            tweet_msg_list = [
+                '.@LiL_Nickyy_ is now online playing {game}, join at {stream_url}',
+                'My father @LiL_Nickyy_ is now playing {game} on Twitch! Join here: {stream_url}',
+                "Guess who's back! @LiL_Nickyy_ is back, back again. Playing {game}! {stream_url}",
+                'It be online like that! @LiL_Nickyy_ playing {game} at {stream_url}'
+            ]
+            tweet(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
             print("tweet send")
             tweet_send = True
         else:
