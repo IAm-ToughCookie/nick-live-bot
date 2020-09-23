@@ -3,6 +3,7 @@ import time
 import tweepy
 import config
 import random
+from datetime import datetime
 
 # DEBUG ONLY
 set_online = False  # if set to true will set URL to BobRoss instead of Nick's stream! 
@@ -41,6 +42,8 @@ def check_online(url, client_id, accept):
     
     if resp.get('stream') is not None:
         online = True
+        now = datetime.now()
+        now_str = now.strftime("%d.%m. %H:%M:%S")
         game = resp.get('stream').get('game')
         stream_url = resp.get('stream').get('channel').get('url')
         tweet_send = False
@@ -50,10 +53,20 @@ def check_online(url, client_id, accept):
                 'My father @LiL_Nickyy_ is now playing {game} on Twitch! Join here: {stream_url}',
                 "Guess who's back! @LiL_Nickyy_ is back, back again. Playing {game}! {stream_url}",
                 'It be online like that! @LiL_Nickyy_ playing {game} at {stream_url}'
+                "Hey it's ya boy, @LiL_Nickyy_ playing that {game} at {stream_url}"
+                "It's {now_str} perfect time to watch @@LiL_Nickyy_ play some {game} at {stream_url}"
+                "[{now_str}] Go and watch some @LiL_Nickyy_ play {game} you filthy casual! {stream_url}"
+                "It is now: {now_str}. Stay hydrated. Practicse self love and watch @LiL_Nickyy_ play {game} at {stream_url}"
             ]
-            tweet(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
-            print("tweet send")
-            tweet_send = True
+            fallback_tweet = ['[{now_str}] @LiL_Nickyy_ is online. Playing {game} at {stream_url}']
+            try:
+                tweet(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
+                print("tweet send")
+                tweet_send = True
+            except tweepy.error.TweepError:
+                tweet(fallback_tweet)
+                print("tweet send")
+                tweet_send = True
         else:
             print('Stream is still online, no new tweet!')
     else:
