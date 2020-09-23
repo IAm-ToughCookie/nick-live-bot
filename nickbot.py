@@ -6,6 +6,7 @@ import random
 from datetime import datetime
 
 # DEBUG ONLY
+debug = False # Set Debug [DEFAULT: False]
 set_online = False  # if set to true will set URL to BobRoss instead of Nick's stream! 
 
 if set_online == True:
@@ -49,20 +50,24 @@ def check_online(url, client_id, accept):
         tweet_send = False
         if tweet_send == False:
             tweet_msg_list = [
-                '.@LiL_Nickyy_ is now online playing {game}, join at {stream_url}',
-                'My father @LiL_Nickyy_ is now playing {game} on Twitch! Join here: {stream_url}',
-                "Guess who's back! @LiL_Nickyy_ is back, back again. Playing {game}! {stream_url}",
-                'It be online like that! @LiL_Nickyy_ playing {game} at {stream_url}'
-                "Hey it's ya boy, @LiL_Nickyy_ playing that {game} at {stream_url}"
-                "It's {now_str} perfect time to watch @@LiL_Nickyy_ play some {game} at {stream_url}"
-                "[{now_str}] Go and watch some @LiL_Nickyy_ play {game} you filthy casual! {stream_url}"
-                "It is now: {now_str}. Stay hydrated. Practicse self love and watch @LiL_Nickyy_ play {game} at {stream_url}"
+                '.@LiL_Nickyy_ is now online playing ' + game + ' join at ' + stream_url,
+                'My father @LiL_Nickyy_ is now playing ' + game + ' on Twitch! Join here: ' + stream_url,
+                'Guess who\'s back! @LiL_Nickyy_ is back, back again. Playing ' + game + ' !  ' + stream_url,
+                'It be online like that! @LiL_Nickyy_ playing  ' + game + ' at ' + stream_url,
+                'Hey it\'s ya boy, @LiL_Nickyy_ playing that  ' + game + ' at ' + stream_url,
+                'It\'s ' + now_str + ' perfect time to watch @LiL_Nickyy_ play some ' + game + ' at ' + stream_url,
+                '[' + now_str + '] Go and watch some @LiL_Nickyy_ play ' + game + ' you filthy casual!  ' + stream_url,
+                'It is now: ' + now_str + ' . Stay hydrated. Practicse self love and watch @LiL_Nickyy_ play ' + game + ' at ' + stream_url
             ]
-            fallback_tweet = ['[{now_str}] @LiL_Nickyy_ is online. Playing {game} at {stream_url}']
+            fallback_tweet = '[' + now_str + '] @LiL_Nickyy_ is online. Playing  ' + game + '  at  ' + stream_url
             try:
-                tweet(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
-                print("tweet send")
-                tweet_send = True
+                if debug is True:
+                    print(f'{game}')
+                    print(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
+                else:
+                    tweet(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
+                    print("tweet send")
+                    tweet_send = True
             except tweepy.error.TweepError:
                 tweet(fallback_tweet)
                 print("tweet send")
