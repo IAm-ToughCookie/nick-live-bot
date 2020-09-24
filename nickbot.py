@@ -6,7 +6,7 @@ import random
 from datetime import datetime
 
 # DEBUG ONLY
-debug = False # Set Debug [DEFAULT: False]
+debug = True # Set Debug [DEFAULT: False]
 set_online = False  # if set to true will set URL to BobRoss instead of Nick's stream! 
 
 if set_online == True:
@@ -37,6 +37,7 @@ def get_initial_state(url, client_id, accept):
 
 def check_online(url, client_id, accept):
     global online
+    global tweet_send
 
     r = requests.get(url, headers={"Client-ID": client_id, "Accept": accept})
     resp = r.json()
@@ -47,7 +48,7 @@ def check_online(url, client_id, accept):
         now_str = now.strftime("%d.%m. %H:%M:%S")
         game = resp.get('stream').get('game')
         stream_url = resp.get('stream').get('channel').get('url')
-        tweet_send = False
+        
         if tweet_send == False:
             tweet_msg_list = [
                 '.@LiL_Nickyy_ is now online playing ' + game + ' join at ' + stream_url,
@@ -66,11 +67,11 @@ def check_online(url, client_id, accept):
                     print(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
                 else:
                     tweet(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
-                    print("tweet send")
+                    print(f"[{datetime.now().strftime('%d.%m., %H:%M:%S')}] tweet send")
                     tweet_send = True
             except tweepy.error.TweepError:
                 tweet(fallback_tweet)
-                print("tweet send")
+                print(f"[{datetime.now().strftime('%d.%m., %H:%M:%S')}] tweet send")
                 tweet_send = True
         else:
             print('Stream is still online, no new tweet!')
@@ -80,16 +81,17 @@ def check_online(url, client_id, accept):
         print('Stream offline')
         
 online = get_initial_state(URL, config.CLIENT_ID, config.ACCEPT)
+tweet_send = False
 
 if online == False:
     while online == False:
-        print(online)
+        print(f'[{datetime.now().strftime("%d.%m., %H:%M:%S")}] Online Status: {online}')
         print('Stream offline: ')
         check_online(URL, config.CLIENT_ID, config.ACCEPT)
         time.sleep(10)
 else:
     while online == True:
-        print(online)
-        print(f'Stream online: ')
+        print(f'[{datetime.now().strftime("%d.%m., %H:%M:%S")}] Online Status: {online}')
+        print(f'[{datetime.now().strftime("%d.%m., %H:%M:%S")}] Stream online: ')
         check_online(URL, config.CLIENT_ID, config.ACCEPT)
         time.sleep(5400)
