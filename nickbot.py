@@ -4,10 +4,16 @@ import tweepy
 import config
 import random
 from datetime import datetime
+import pytz
 
 # DEBUG ONLY
 debug = True # Set Debug [DEFAULT: False]
 set_online = False  # if set to true will set URL to BobRoss instead of Nick's stream! 
+
+# SETUP TIMEZONE
+utc_now = pytz.utc.localize(datetime.now())
+cest_now = utc_now.astimezone(pytz.timezone("Europe/Vienna"))
+cest_now_str = cest_now.strftime("%d. %b, %H:%M:%S")
 
 if set_online == True:
     URL = "https://api.twitch.tv/kraken/streams/105458682" # BobRoss-Stream
@@ -67,31 +73,43 @@ def check_online(url, client_id, accept):
                     print(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
                 else:
                     tweet(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
-                    print(f"[{datetime.now().strftime('%d.%m., %H:%M:%S')}] tweet send")
+                    print(f'-'*20 + ' Tweet send')
                     tweet_send = True
             except tweepy.error.TweepError:
                 tweet(fallback_tweet)
-                print(f"[{datetime.now().strftime('%d.%m., %H:%M:%S')}] tweet send")
+                print(f'-'*20 + ' Fallback-tweet send')
                 tweet_send = True
         else:
-            print('Stream is still online, no new tweet!')
+            print(f'-'*20 + ' No tweet - Stream still online')
     else:
         online = False
         tweet_send = False
-        print('Stream offline')
+        print(f'-'*20 + ' No tweet - Stream offline')
         
 online = get_initial_state(URL, config.CLIENT_ID, config.ACCEPT)
 tweet_send = False
 
-if online == False:
-    while online == False:
-        print(f'[{datetime.now().strftime("%d.%m., %H:%M:%S")}] Online Status: {online}')
-        print('Stream offline: ')
-        check_online(URL, config.CLIENT_ID, config.ACCEPT)
-        time.sleep(10)
-else:
+
+def start_online_loop():
     while online == True:
-        print(f'[{datetime.now().strftime("%d.%m., %H:%M:%S")}] Online Status: {online}')
-        print(f'[{datetime.now().strftime("%d.%m., %H:%M:%S")}] Stream online: ')
+        print(f'[{cest_now_str}] Online Status: {online}')
         check_online(URL, config.CLIENT_ID, config.ACCEPT)
         time.sleep(5400)
+
+    start_offline_loop()
+
+def start_offline_loop():
+    while online == False:
+        print(f'[{cest_now_str}] Online Status: {online}')
+        check_online(URL, config.CLIENT_ID, config.ACCEPT)
+        time.sleep(10)
+
+    start_online_loop()
+
+
+if online == False:
+    print('Offline loop started... ')
+    start_offline_loop()
+else:
+    print('Online loop started...')
+    start_online_loop()
