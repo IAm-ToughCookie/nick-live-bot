@@ -11,14 +11,19 @@ debug = True # Set Debug [DEFAULT: False]
 set_online = False  # if set to true will set URL to BobRoss instead of Nick's stream! 
 
 # SETUP TIMEZONE
-utc_now = pytz.utc.localize(datetime.now())
-cest_now = utc_now.astimezone(pytz.timezone("Europe/Vienna"))
-cest_now_str = cest_now.strftime("%d. %b, %H:%M:%S")
+
 
 if set_online == True:
     URL = "https://api.twitch.tv/kraken/streams/105458682" # BobRoss-Stream
 else:
     URL = "https://api.twitch.tv/kraken/streams/441080048" # Nick-Stream
+
+
+def get_time():
+    utc_now = pytz.utc.localize(datetime.now())
+    cest_now = utc_now.astimezone(pytz.timezone("Europe/Vienna"))
+    cest_now_str = cest_now.strftime("%d. %b, %H:%M:%S")
+    return cest_now_str
 
 def tweet(msg):
     auth = tweepy.OAuthHandler(config.API_KEY, config.API_SECRET)
@@ -62,11 +67,11 @@ def check_online(url, client_id, accept):
                 'Guess who\'s back! @LiL_Nickyy_ is back, back again. Playing ' + game + ' !  ' + stream_url,
                 'It be online like that! @LiL_Nickyy_ playing  ' + game + ' at ' + stream_url,
                 'Hey it\'s ya boy, @LiL_Nickyy_ playing that  ' + game + ' at ' + stream_url,
-                'It\'s ' + now_str + ' perfect time to watch @LiL_Nickyy_ play some ' + game + ' at ' + stream_url,
-                '[' + now_str + '] Go and watch some @LiL_Nickyy_ play ' + game + ' you filthy casual!  ' + stream_url,
-                'It is now: ' + now_str + ' . Stay hydrated. Practicse self love and watch @LiL_Nickyy_ play ' + game + ' at ' + stream_url
+                'It\'s ' + get_time() + ' perfect time to watch @LiL_Nickyy_ play some ' + game + ' at ' + stream_url,
+                '[' + get_time() + '] Go and watch some @LiL_Nickyy_ play ' + game + ' you filthy casual!  ' + stream_url,
+                'It is now: ' + get_time() + ' . Stay hydrated. Practicse self love and watch @LiL_Nickyy_ play ' + game + ' at ' + stream_url
             ]
-            fallback_tweet = '[' + now_str + '] @LiL_Nickyy_ is online. Playing  ' + game + '  at  ' + stream_url
+            fallback_tweet = '[' + get_time()+ '] @LiL_Nickyy_ is online. Playing  ' + game + '  at  ' + stream_url
             try:
                 if debug is True:
                     print(f'{game}')
@@ -92,7 +97,7 @@ tweet_send = False
 
 def start_online_loop():
     while online == True:
-        print(f'[{cest_now_str}] Online Status: {online}')
+        print(f'[{get_time()}] Online Status: {online}')
         check_online(URL, config.CLIENT_ID, config.ACCEPT)
         time.sleep(5400)
 
@@ -100,7 +105,7 @@ def start_online_loop():
 
 def start_offline_loop():
     while online == False:
-        print(f'[{cest_now_str}] Online Status: {online}')
+        print(f'[{get_time()}] Online Status: {online}')
         check_online(URL, config.CLIENT_ID, config.ACCEPT)
         time.sleep(10)
 
