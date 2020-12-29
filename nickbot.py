@@ -37,9 +37,14 @@ def tweet(msg):
     status = api.update_status(status=tweet)
 
 def get_initial_state(url, client_id, accept):
-    r = requests.get(url, headers={"Client-ID": client_id, "Accept": accept})
-    resp = r.json()
-    
+    try:
+        r = requests.get(url, headers={"Client-ID": client_id, "Accept": accept})
+        resp = r.json()
+    except ValueError:
+        print(f"Request failed at initial state: {r.status_code} - {r.reason}")
+        online = False
+        return online
+
     if resp.get('stream') is None:
         online = False
     else:
@@ -50,8 +55,14 @@ def check_online(url, client_id, accept):
     global online
     global tweet_send
 
-    r = requests.get(url, headers={"Client-ID": client_id, "Accept": accept})
-    resp = r.json()
+    try:
+        r = requests.get(url, headers={"Client-ID": client_id, "Accept": accept})
+        resp = r.json()
+    except ValueError: 
+        print(f"Request failed at initial state: {r.status_code} - {r.reason}")
+        online = False
+        tweet_send = False
+        print(f'-'*20 + ' No tweet - Stream offline')
     
     if resp.get('stream') is not None:
         online = True
