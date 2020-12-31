@@ -58,49 +58,52 @@ def check_online(url, client_id, accept):
     try:
         r = requests.get(url, headers={"Client-ID": client_id, "Accept": accept})
         resp = r.json()
+
+        if resp.get('stream') is not None:
+            online = True
+            now = datetime.now()
+            now_str = now.strftime("%d.%m. %H:%M:%S")
+            game = resp.get('stream').get('game')
+            stream_url = resp.get('stream').get('channel').get('url')
+            
+            if tweet_send == False:
+                tweet_msg_list = [
+                    '.@LiL_Nickyy_ is now online playing ' + game + ' join at ' + stream_url,
+                    'My father @LiL_Nickyy_ is now playing ' + game + ' on Twitch! Join here: ' + stream_url,
+                    'Guess who\'s back! @LiL_Nickyy_ is back, back again. Playing ' + game + ' !  ' + stream_url,
+                    'It be online like that! @LiL_Nickyy_ playing  ' + game + ' at ' + stream_url,
+                    'Hey it\'s ya boy, @LiL_Nickyy_ playing that  ' + game + ' at ' + stream_url,
+                    'It\'s ' + get_time() + ' perfect time to watch @LiL_Nickyy_ play some ' + game + ' at ' + stream_url,
+                    '[' + get_time() + '] Go and watch some @LiL_Nickyy_ play ' + game + ' you filthy casual!  ' + stream_url,
+                    'It is now: ' + get_time() + ' . Stay hydrated. Practicse self love and watch @LiL_Nickyy_ play ' + game + ' at ' + stream_url
+                ]
+                fallback_tweet = '[' + get_time()+ '] @LiL_Nickyy_ is online. Playing  ' + game + '  at  ' + stream_url
+                try:
+                    if debug is True:
+                        print(f'{game}')
+                        print(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
+                    else:
+                        tweet(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
+                        print(f'-'*20 + ' Tweet send')
+                        tweet_send = True
+                except tweepy.error.TweepError:
+                    tweet(fallback_tweet)
+                    print(f'-'*20 + ' Fallback-tweet send')
+                    tweet_send = True
+            else:
+                print(f'-'*20 + ' No tweet - Stream still online')
+        else:
+            online = False
+            tweet_send = False
+            print(f'-'*20 + ' No tweet - Stream offline')
+
     except ValueError: 
         print(f"Request failed at initial state: {r.status_code} - {r.reason}")
         online = False
         tweet_send = False
         print(f'-'*20 + ' No tweet - Stream offline')
     
-    if resp.get('stream') is not None:
-        online = True
-        now = datetime.now()
-        now_str = now.strftime("%d.%m. %H:%M:%S")
-        game = resp.get('stream').get('game')
-        stream_url = resp.get('stream').get('channel').get('url')
-        
-        if tweet_send == False:
-            tweet_msg_list = [
-                '.@LiL_Nickyy_ is now online playing ' + game + ' join at ' + stream_url,
-                'My father @LiL_Nickyy_ is now playing ' + game + ' on Twitch! Join here: ' + stream_url,
-                'Guess who\'s back! @LiL_Nickyy_ is back, back again. Playing ' + game + ' !  ' + stream_url,
-                'It be online like that! @LiL_Nickyy_ playing  ' + game + ' at ' + stream_url,
-                'Hey it\'s ya boy, @LiL_Nickyy_ playing that  ' + game + ' at ' + stream_url,
-                'It\'s ' + get_time() + ' perfect time to watch @LiL_Nickyy_ play some ' + game + ' at ' + stream_url,
-                '[' + get_time() + '] Go and watch some @LiL_Nickyy_ play ' + game + ' you filthy casual!  ' + stream_url,
-                'It is now: ' + get_time() + ' . Stay hydrated. Practicse self love and watch @LiL_Nickyy_ play ' + game + ' at ' + stream_url
-            ]
-            fallback_tweet = '[' + get_time()+ '] @LiL_Nickyy_ is online. Playing  ' + game + '  at  ' + stream_url
-            try:
-                if debug is True:
-                    print(f'{game}')
-                    print(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
-                else:
-                    tweet(tweet_msg_list[random.randrange(0,len(tweet_msg_list))])
-                    print(f'-'*20 + ' Tweet send')
-                    tweet_send = True
-            except tweepy.error.TweepError:
-                tweet(fallback_tweet)
-                print(f'-'*20 + ' Fallback-tweet send')
-                tweet_send = True
-        else:
-            print(f'-'*20 + ' No tweet - Stream still online')
-    else:
-        online = False
-        tweet_send = False
-        print(f'-'*20 + ' No tweet - Stream offline')
+    
         
 online = get_initial_state(URL, config.CLIENT_ID, config.ACCEPT)
 tweet_send = False
@@ -118,7 +121,7 @@ def start_offline_loop():
     while online == False:
         print(f'[{get_time()}] Online Status: {online}')
         check_online(URL, config.CLIENT_ID, config.ACCEPT)
-        time.sleep(10)
+        time.sleep(60)
 
     start_online_loop()
 
